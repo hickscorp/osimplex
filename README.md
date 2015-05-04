@@ -29,5 +29,5 @@ OSimplex::Generator.new(123).get_3d 42, 42, 42
 You could also directly reference the gem from your Gemfile:
 
 ```
-gem 'osimplex'
+gem 'osimplex', github:   'hickscorp/osimplex'
 ```
