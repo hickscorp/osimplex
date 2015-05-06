@@ -10,10 +10,6 @@
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
 
-#define GENERATOR() \
-        OSimplexGenerator* generator; \
-        Data_Get_Struct(self, OSimplexGenerator, generator)
-
 void Init_osimplex () {
   VALUE clsModule     = rb_define_module("OSimplex");
   VALUE clsGenerator  = rb_define_class_under(clsModule, "Generator", rb_cObject);
@@ -33,22 +29,27 @@ VALUE OSimplex_Generator_allocate (VALUE klass) {
 }
 // Initializes a newly created Generator object instance.
 VALUE OSimplex_Generator_init (const int argc, const VALUE *argv, const VALUE self) {
-  GENERATOR();
-  VALUE   seed      = UINT2NUM(0);
-  VALUE   scale     = rb_float_new(1.0);
-  VALUE   alpha     = rb_float_new(1.0);
-  VALUE   beta      = rb_float_new(0.0);
-  rb_scan_args(argc, argv, "04", &seed, &alpha, &beta);
-  generator->scale  = NUM2DBL( scale );
-  generator->alpha  = NUM2DBL( alpha );
-  generator->beta   = NUM2DBL( beta );
-  open_simplex_noise(NUM2UINT(seed), &generator->context);
+  OSimplexGenerator* gen;
+  Data_Get_Struct(self, OSimplexGenerator, gen);
+
+  VALUE   seed    = UINT2NUM(0);
+  VALUE   scale   = rb_float_new(1.0);
+  VALUE   alpha   = rb_float_new(1.0);
+  VALUE   beta    = rb_float_new(0.0);
+
+  rb_scan_args(argc, argv, "04", &seed, &scale, &alpha, &beta);
+
+  open_simplex_noise(NUM2UINT(seed), &gen->context);
+  gen->scale      = NUM2DBL( scale );
+  gen->alpha      = NUM2DBL( alpha );
+  gen->beta       = NUM2DBL( beta );
+
   return self;
 }
 // Frees-up a Generator object instance.
-void OSimplex_Generator_free (OSimplexGenerator *generator) {
-  open_simplex_noise_free(generator->context);
-  xfree(generator);
+void OSimplex_Generator_free (OSimplexGenerator *gen) {
+  open_simplex_noise_free(gen->context);
+  xfree(gen);
 }
 
 inline double normalize (double n, double alpha, double beta) {
@@ -56,17 +57,23 @@ inline double normalize (double n, double alpha, double beta) {
   return max( min( alpha * ( ( ( 1.0 + n ) / 2.0 ) + beta ), 1.0 ), 0.0 );
 }
 VALUE OSimplex_Generator_get_2d (VALUE self, VALUE x, VALUE y) {
-  GENERATOR();
-  double  ret   = open_simplex_noise2( generator->context, NUM2DBL(x) / generator->scale, NUM2DBL(y) / generator->scale );
-  return  rb_float_new( normalize(ret, generator->alpha, generator->beta) );
+  OSimplexGenerator* gen;
+  Data_Get_Struct(self, OSimplexGenerator, gen);
+
+  double  ret   = open_simplex_noise2( gen->context, NUM2DBL(x) / gen->scale, NUM2DBL(y) / gen->scale );
+  return  rb_float_new( normalize(ret, gen->alpha, gen->beta) );
 }
 VALUE OSimplex_Generator_get_3d (VALUE self, VALUE x, VALUE y, VALUE z) {
-  GENERATOR();
-  double  ret   = open_simplex_noise3( generator->context, NUM2DBL(x) / generator->scale, NUM2DBL(y) / generator->scale, NUM2DBL(z) / generator->scale );
-  return  rb_float_new( normalize(ret, generator->alpha, generator->beta) );
+  OSimplexGenerator* gen;
+  Data_Get_Struct(self, OSimplexGenerator, gen);
+
+  double  ret   = open_simplex_noise3( gen->context, NUM2DBL(x) / gen->scale, NUM2DBL(y) / gen->scale, NUM2DBL(z) / gen->scale );
+  return  rb_float_new( normalize(ret, gen->alpha, gen->beta) );
 }
 VALUE OSimplex_Generator_get_4d (VALUE self, VALUE x, VALUE y, VALUE z, VALUE w) {
-  GENERATOR();
-  double  ret   = open_simplex_noise4( generator->context, NUM2DBL(x) / generator->scale, NUM2DBL(y) / generator->scale, NUM2DBL(z) / generator->scale, NUM2DBL(w) / generator->scale );
-  return  rb_float_new( normalize(ret, generator->alpha, generator->beta) );
+  OSimplexGenerator* gen;
+  Data_Get_Struct(self, OSimplexGenerator, gen);
+
+  double  ret   = open_simplex_noise4( gen->context, NUM2DBL(x) / gen->scale, NUM2DBL(y) / gen->scale, NUM2DBL(z) / gen->scale, NUM2DBL(w) / gen->scale );
+  return  rb_float_new( normalize(ret, gen->alpha, gen->beta) );
 }
