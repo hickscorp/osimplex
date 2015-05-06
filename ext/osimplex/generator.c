@@ -14,8 +14,6 @@
         OSimplexGenerator* generator; \
         Data_Get_Struct(self, OSimplexGenerator, generator)
 
-#define FEATURE_SIZE 16
-
 void Init_osimplex () {
   VALUE clsModule     = rb_define_module("OSimplex");
   VALUE clsGenerator  = rb_define_class_under(clsModule, "Generator", rb_cObject);
@@ -37,11 +35,13 @@ VALUE OSimplex_Generator_allocate (VALUE klass) {
 VALUE OSimplex_Generator_init (const int argc, const VALUE *argv, const VALUE self) {
   GENERATOR();
   VALUE   seed      = UINT2NUM(0);
+  VALUE   scale     = rb_float_new(1.0);
   VALUE   alpha     = rb_float_new(1.0);
   VALUE   beta      = rb_float_new(0.0);
   rb_scan_args(argc, argv, "03", &seed, &alpha, &beta);
+  generator->scale  = NUM2DBL( scale );
   generator->alpha  = NUM2DBL( alpha );
-  generator->beta  = NUM2DBL( beta );
+  generator->beta   = NUM2DBL( beta );
   open_simplex_noise(NUM2UINT(seed), &generator->context);
   return self;
 }
@@ -57,16 +57,16 @@ inline double normalize (double n, double alpha, double beta) {
 }
 VALUE OSimplex_Generator_get_2d (VALUE self, VALUE x, VALUE y) {
   GENERATOR();
-  double  ret   = open_simplex_noise2( generator->context, NUM2DBL(x) / FEATURE_SIZE, NUM2DBL(y) / FEATURE_SIZE );
+  double  ret   = open_simplex_noise2( generator->context, NUM2DBL(x) / generator->scale, NUM2DBL(y) / generator->scale );
   return  rb_float_new( normalize(ret, generator->alpha, generator->beta) );
 }
 VALUE OSimplex_Generator_get_3d (VALUE self, VALUE x, VALUE y, VALUE z) {
   GENERATOR();
-  double  ret   = open_simplex_noise3( generator->context, NUM2DBL(x) / FEATURE_SIZE, NUM2DBL(y) / FEATURE_SIZE, NUM2DBL(z) / FEATURE_SIZE );
+  double  ret   = open_simplex_noise3( generator->context, NUM2DBL(x) / generator->scale, NUM2DBL(y) / generator->scale, NUM2DBL(z) / generator->scale );
   return  rb_float_new( normalize(ret, generator->alpha, generator->beta) );
 }
 VALUE OSimplex_Generator_get_4d (VALUE self, VALUE x, VALUE y, VALUE z, VALUE w) {
   GENERATOR();
-  double  ret   = open_simplex_noise4( generator->context, NUM2DBL(x) / FEATURE_SIZE, NUM2DBL(y) / FEATURE_SIZE, NUM2DBL(z) / FEATURE_SIZE, NUM2DBL(w) / FEATURE_SIZE );
+  double  ret   = open_simplex_noise4( generator->context, NUM2DBL(x) / generator->scale, NUM2DBL(y) / generator->scale, NUM2DBL(z) / generator->scale, NUM2DBL(w) / generator->scale );
   return  rb_float_new( normalize(ret, generator->alpha, generator->beta) );
 }

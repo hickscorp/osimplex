@@ -6,7 +6,7 @@
 #include <ruby.h>
 
 typedef struct _OSimpleGenerator {
-  double      alpha, beta;
+  double      scale, alpha, beta;
   struct osn_context *context;
 } OSimplexGenerator;
 
