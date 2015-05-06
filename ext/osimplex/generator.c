@@ -38,7 +38,7 @@ VALUE OSimplex_Generator_init (const int argc, const VALUE *argv, const VALUE se
   VALUE   scale     = rb_float_new(1.0);
   VALUE   alpha     = rb_float_new(1.0);
   VALUE   beta      = rb_float_new(0.0);
-  rb_scan_args(argc, argv, "03", &seed, &alpha, &beta);
+  rb_scan_args(argc, argv, "04", &seed, &alpha, &beta);
   generator->scale  = NUM2DBL( scale );
   generator->alpha  = NUM2DBL( alpha );
   generator->beta   = NUM2DBL( beta );
