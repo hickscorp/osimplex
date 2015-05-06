@@ -52,28 +52,28 @@ void OSimplex_Generator_free (OSimplexGenerator *gen) {
   xfree(gen);
 }
 
-inline double normalize (double n, double alpha, double beta) {
+inline double normalize (const double n, const OSimplexGenerator *gen) {
   // Normalize between 0 and 1, apply contrast and brightness, then stay within 0..1 range.
-  return max( min( alpha * ( ( ( 1.0 + n ) / 2.0 ) + beta ), 1.0 ), 0.0 );
+  return max( min( gen->alpha * ( ( ( 1.0 + n ) / 2.0 ) + gen->beta ), 1.0 ), 0.0 );
 }
 VALUE OSimplex_Generator_get_2d (VALUE self, VALUE x, VALUE y) {
   OSimplexGenerator* gen;
   Data_Get_Struct(self, OSimplexGenerator, gen);
 
   double  ret   = open_simplex_noise2( gen->context, NUM2DBL(x) / gen->scale, NUM2DBL(y) / gen->scale );
-  return  rb_float_new( normalize(ret, gen->alpha, gen->beta) );
+  return  rb_float_new( normalize(ret, gen ) );
 }
 VALUE OSimplex_Generator_get_3d (VALUE self, VALUE x, VALUE y, VALUE z) {
   OSimplexGenerator* gen;
   Data_Get_Struct(self, OSimplexGenerator, gen);
 
   double  ret   = open_simplex_noise3( gen->context, NUM2DBL(x) / gen->scale, NUM2DBL(y) / gen->scale, NUM2DBL(z) / gen->scale );
-  return  rb_float_new( normalize(ret, gen->alpha, gen->beta) );
+  return  rb_float_new( normalize(ret, gen ) );
 }
 VALUE OSimplex_Generator_get_4d (VALUE self, VALUE x, VALUE y, VALUE z, VALUE w) {
   OSimplexGenerator* gen;
   Data_Get_Struct(self, OSimplexGenerator, gen);
 
   double  ret   = open_simplex_noise4( gen->context, NUM2DBL(x) / gen->scale, NUM2DBL(y) / gen->scale, NUM2DBL(z) / gen->scale, NUM2DBL(w) / gen->scale );
-  return  rb_float_new( normalize(ret, gen->alpha, gen->beta) );
+  return  rb_float_new( normalize(ret, gen ) );
 }
